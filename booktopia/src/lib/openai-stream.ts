@@ -1,23 +1,23 @@
-import { ParseEvent, ReconnectInterval, createParser } from "eventsource-parser"
+import { ParsedEvent, ReconnectInterval, createParser } from "eventsource-parser"
 
 export type ChatGPTAgent = "user" | "system"
 
-export interface ChatGPTMessage{
-     role:ChatGPTAgent,
-     content:string
-}
-
-export interface OpenAIStreamPayload{
-     model:string,
-     messages:ChatGPTMessage[],
-     temperature:number,
-     top_p:number,
-     frequency_penalty:number,
-     presence_penalty:number,
-     max_tokens:number,
-     stream:boolean,
-     n:number
-}
+export interface ChatGPTMessage {
+     role: ChatGPTAgent;
+     content: string;
+   }
+   
+   export interface OpenAIStreamPayload {
+     model: string;
+     messages: ChatGPTMessage[];
+     temperature: number;
+     top_p: number;
+     frequency_penalty: number;
+     presence_penalty: number;
+     max_tokens: number;
+     stream: boolean;
+     n: number;
+   }
 
 export async function OpenAIStream(payload:OpenAIStreamPayload){
          const encoder = new TextEncoder()
@@ -25,10 +25,10 @@ export async function OpenAIStream(payload:OpenAIStreamPayload){
 
          let counter = 0
 
-         const res = await fetch('https://api.openai.com/v1/chat/completions',{
+         const res = await fetch("https://api.openai.com/v1/chat/completions",{
                method:'POST',
                headers:{
-                     'Content-Type':'application/json',
+                     "Content-Type":"application/json",
                       Authorization:`Bearer ${process.env.OPENAI_API_KEY}`
                },
                body:JSON.stringify(payload)
@@ -36,18 +36,18 @@ export async function OpenAIStream(payload:OpenAIStreamPayload){
 
          const stream = new ReadableStream({
             async start(controller){
-                function onParse(event:ParseEvent | ReconnectInterval){
+                function onParse(event:ParsedEvent | ReconnectInterval){
 
-                       if(event.type === 'event'){
+                       if(event.type === "event"){
                           const data = event.data
-                          if(data === '[DONE]'){
+                          if(data === "[DONE]"){
                                 controller.close()
                                 return 
                           }
                           try{
                                const json = JSON.parse(data)
                                console.log('json',json)
-                               const text = json.choices[0].delta?.content || ''
+                               const text = json.choices[0].delta?.content || ""
                                console.log('text',text)
                                if(counter < 2 && (text.match(/\n/)||[]).length){
                                     return 
@@ -56,8 +56,8 @@ export async function OpenAIStream(payload:OpenAIStreamPayload){
                                controller.enqueue(queue)
                                counter ++ 
 
-                          }catch(err){
-                               controller.error(err)
+                          }catch(e){
+                               controller.error(e)
                           }
                        }
                 }
