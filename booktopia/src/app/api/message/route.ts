@@ -1,5 +1,5 @@
 import { MessageArraySchema } from "@/lib/validators/message"
-import { ChatGPTMessage } from "@/lib/openai-stream"
+import { ChatGPTMessage, OpenAIStream } from "@/lib/openai-stream"
 import { chatbotPrompt } from "@/app/helpers/constants/chatbot-prompt"
 
 export async function POST(req:Request){
