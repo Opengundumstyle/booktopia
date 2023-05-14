@@ -1,18 +1,25 @@
-import { NextRequest, NextResponse } from "next/server";
-import { rateLimiter } from "./lib/rate-limiter";
+// middleware.ts
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+import { rateLimiter } from '@/lib/rate-limiter'
 
-export async function middleware(req:NextRequest){
-      const ip = req.ip??'127.0.0.1'
+// This function can be marked `async` if using `await` inside
+export async function middleware(req: NextRequest) {
+  const ip = req.ip ?? '127.0.0.1'
 
-      try{
-         const {success} = await rateLimiter.limit(ip)
-         if(!success) return new NextRequest('You are writing messages too fast.')
-         return NextResponse.next()
-      }catch(err){
-         return new NextResponse('sorry, something went wrong. Please try again later')
-      }
+  try {
+    const { success } = await rateLimiter.limit(ip)
+
+    if (!success) return new NextResponse('You are writing messages too fast.')
+    return NextResponse.next()
+  } catch (error) {
+    return new NextResponse(
+      'Sorry, something went wrong processing your message. Please try again later.'
+    )
+  }
 }
 
+// See "Matching Paths" below to learn more
 export const config = {
-    matcher:'/api/message/:path*'
+  matcher: '/api/message/:path*',
 }
